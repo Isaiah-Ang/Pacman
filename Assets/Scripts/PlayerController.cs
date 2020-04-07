@@ -1,10 +1,10 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
-
     public float speed = 0.4f;
     Vector2 _dest = Vector2.zero;
     Vector2 _dir = Vector2.zero;
@@ -25,6 +25,8 @@ public class PlayerController : MonoBehaviour
     private GameManager GM;
     private ScoreManager SM;
 
+    public Joystick joystick;
+
     private bool _deadPlaying = false;
 
     // Use this for initialization
@@ -39,6 +41,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+       
         switch (GameManager.gameState)
         {
             case GameManager.GameState.Game:
@@ -50,9 +53,8 @@ public class PlayerController : MonoBehaviour
                 if (!_deadPlaying)
                     StartCoroutine("PlayDeadAnimation");
                 break;
-        }
-
-
+        }    
+        
     }
 
     IEnumerator PlayDeadAnimation()
@@ -106,25 +108,53 @@ public class PlayerController : MonoBehaviour
         Vector2 p = Vector2.MoveTowards(transform.position, _dest, speed);
         GetComponent<Rigidbody2D>().MovePosition(p);
 
+        #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_WEBPLAYER
+
         // get the next direction from keyboard
         if (Input.GetAxis("Horizontal") > 0) _nextDir = Vector2.right;
         if (Input.GetAxis("Horizontal") < 0) _nextDir = -Vector2.right;
         if (Input.GetAxis("Vertical") > 0) _nextDir = Vector2.up;
         if (Input.GetAxis("Vertical") < 0) _nextDir = -Vector2.up;
 
+        #else
+        if (joystick.Horizontal > .2f) 
+        { 
+            Debug.Log("Horizontal > 0");
+            _nextDir = Vector2.right;
+        } else if (joystick.Horizontal < -.2f) 
+        { 
+            Debug.Log("Horizontal < 0");
+            _nextDir = -Vector2.right;
+        }
+
+        if (joystick.Vertical > .2f)
+        {
+            Debug.Log("Vertical > 0");
+            _nextDir = Vector2.up;
+        } else if (joystick.Vertical < -.2f)
+        {
+            Debug.Log("Vertical < 0");
+            _nextDir = -Vector2.up;
+        }
+
+    #endif
         // if pacman is in the center of a tile
         if (Vector2.Distance(_dest, transform.position) < 0.00001f)
         {
+            Debug.Log("_nextDir: " + _nextDir);
             if (Valid(_nextDir))
             {
                 _dest = (Vector2)transform.position + _nextDir;
                 _dir = _nextDir;
+
+                Debug.Log("Moving");
             }
             else   // if next direction is not valid
             {
                 if (Valid(_dir))  // and the prev. direction is valid
                     _dest = (Vector2)transform.position + _dir;   // continue on that direction
 
+                Debug.Log("No Movement");
                 // otherwise, do nothing
             }
         }
