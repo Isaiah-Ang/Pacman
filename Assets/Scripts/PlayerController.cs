@@ -116,28 +116,30 @@ public class PlayerController : MonoBehaviour
         if (Input.GetAxis("Vertical") > 0) _nextDir = Vector2.up;
         if (Input.GetAxis("Vertical") < 0) _nextDir = -Vector2.up;
 
+        joystick.GetComponent<Renderer>().enabled = false;
+        
         #else
-        if (joystick.Horizontal > .2f) 
+        if (joystick.Horizontal == 1) 
         { 
             Debug.Log("Horizontal > 0");
             _nextDir = Vector2.right;
-        } else if (joystick.Horizontal < -.2f) 
+        } else if (joystick.Horizontal == -1) 
         { 
             Debug.Log("Horizontal < 0");
             _nextDir = -Vector2.right;
         }
 
-        if (joystick.Vertical > .2f)
+        if (joystick.Vertical == 1)
         {
             Debug.Log("Vertical > 0");
             _nextDir = Vector2.up;
-        } else if (joystick.Vertical < -.2f)
+        } else if (joystick.Vertical == -1)
         {
             Debug.Log("Vertical < 0");
             _nextDir = -Vector2.up;
         }
 
-    #endif
+        #endif
         // if pacman is in the center of a tile
         if (Vector2.Distance(_dest, transform.position) < 0.00001f)
         {
