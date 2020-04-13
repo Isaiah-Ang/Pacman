@@ -69,9 +69,15 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("Treshold for High Score: " + SM.LowestHigh());
             if (GameManager.score >= SM.LowestHigh())
+            {
                 GUINav.getScoresMenu();
+                Debug.Log("GetScoresMenu");
+            }
             else
+            {
                 GUINav.H_ShowGameOverScreen();
+                Debug.Log("Game Over");
+            }
         }
 
         else
@@ -111,12 +117,27 @@ public class PlayerController : MonoBehaviour
         #if UNITY_EDITOR || UNITY_STANDALONE || UNITY_WEBPLAYER
 
         // get the next direction from keyboard
-        if (Input.GetAxis("Horizontal") > 0) _nextDir = Vector2.right;
-        if (Input.GetAxis("Horizontal") < 0) _nextDir = -Vector2.right;
-        if (Input.GetAxis("Vertical") > 0) _nextDir = Vector2.up;
-        if (Input.GetAxis("Vertical") < 0) _nextDir = -Vector2.up;
-
-        joystick.GetComponent<Renderer>().enabled = false;
+        if (Input.GetAxis("Horizontal") > 0) 
+        {
+            _nextDir = Vector2.right;
+            Debug.Log("Key Pressed");
+        }
+        if (Input.GetAxis("Horizontal") < 0)
+        {
+            _nextDir = -Vector2.right;
+            Debug.Log("Key Pressed");
+        } 
+        if (Input.GetAxis("Vertical") > 0) 
+        {
+            _nextDir = Vector2.up;
+            Debug.Log("Key Pressed");
+        }
+        if (Input.GetAxis("Vertical") < 0) 
+        {
+            _nextDir = -Vector2.up;
+            Debug.Log("Key Pressed");
+        }
+        //joystick.GetComponent<Renderer>().enabled = false;
         
         #else
         if (joystick.Horizontal == 1) 

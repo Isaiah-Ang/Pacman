@@ -92,6 +92,7 @@ public class GameGUINavigation : MonoBehaviour {
 		GameManager.gameState = GameManager.GameState.Scores;
 		MenuButton.enabled = false;
 		ScoreCanvas.enabled = true;
+		Debug.Log("GameGUINavigation.getScoresMenu");
 	}
 
 	//------------------------------------------------------------------
@@ -149,31 +150,18 @@ public class GameGUINavigation : MonoBehaviour {
 
     IEnumerator AddScore(string name, int score)
     {
-        string privateKey = "pKey";
-        string AddScoreURL = "http://ilbeyli.byethost18.com/addscore.php?";
-        string hash = Md5Sum(name + score + privateKey);
+        PlayerPrefs.SetString("Name", name);
+		PlayerPrefs.SetInt("Highscore", score);
 
-        Debug.Log("Name: " + name + " Escape: " + WWW.EscapeURL(name));
+        Debug.Log("SCORE POSTED!");
 
-        WWW ScorePost = new WWW(AddScoreURL + "name=" + WWW.EscapeURL(name) + "&score=" + score + "&hash=" + hash );
-        yield return ScorePost;
+        // take care of game manager
+        Destroy(GameObject.Find("Game Manager"));
+        GameManager.score = 0;
+        GameManager.Level = 0;
 
-        if (ScorePost.error == null)
-        {
-            Debug.Log("SCORE POSTED!");
-
-            // take care of game manager
-            Destroy(GameObject.Find("Game Manager"));
-            GameManager.score = 0;
-            GameManager.Level = 0;
-
-            Application.LoadLevel("scores");
-            Time.timeScale = 1.0f;
-        }
-        else
-        {
-            Debug.Log("Error posting results: " + ScorePost.error);
-        }
+    	Application.LoadLevel("scores");
+        Time.timeScale = 1.0f;
 
         yield return new WaitForSeconds(2);
     }
@@ -200,6 +188,7 @@ public class GameGUINavigation : MonoBehaviour {
 
 	public void SubmitScores()
 	{
+		Debug.Log("Submit Scores");
 		// Check username, post to database if its good to go
 	    int highscore = GameManager.score;
         string username = ScoreCanvas.GetComponentInChildren<InputField>().GetComponentsInChildren<Text>()[1].text;
@@ -208,7 +197,10 @@ public class GameGUINavigation : MonoBehaviour {
 	    if (username == "")                 ToggleErrorMsg("Username cannot be empty");
         else if (!regex.IsMatch(username))  ToggleErrorMsg("Username can only consist alpha-numberic characters");
         else if (username.Length > 10)      ToggleErrorMsg("Username cannot be longer than 10 characters");
-        else                                StartCoroutine(AddScore(username, highscore));
+        else
+		{
+			StartCoroutine(AddScore(username, highscore));
+		}
 	    
 	}
 
