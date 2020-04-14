@@ -155,16 +155,21 @@ public class GameGUINavigation : MonoBehaviour {
         PlayerPrefs.SetString("Name", name);
 		PlayerPrefs.SetInt("Highscore", score);
 
+		Debug.Log("Assigned Player Pref");
+
 		//Connect to a database
-		String cs = @"server=localhost:3306;userid=root;password=12345678;database=pacman";
+		string cs = "server=localhost;user=root;database=pacman;port=3306;password=12345678";
 		MySqlConnection con = new MySqlConnection(cs);
-		con.Open();
+		//try{
+			con.Open();
 
-		Debug.Log("Connected to database: " + con.ServerVersion);
-		//Append the score to a database
+			Debug.Log("Connected to database: " + con.ServerVersion);
+			//Append the score to a database
 
-		Debug.Log("Appended Score");
-
+			Debug.Log("Appended Score");
+		//} catch(Exception ex){
+		//	Debug.Log(ex);
+		//}
         Debug.Log("SCORE POSTED!");
 
         // take care of game manager
