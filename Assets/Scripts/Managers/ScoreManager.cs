@@ -69,22 +69,23 @@ public class ScoreManager : MonoBehaviour {
     {
         // wait until scores are pulled from database
         float timeOut = Time.time + 4;
-        while (!_scoresRead)
-        {
-            yield return new WaitForSeconds(0.01f);
-            if (Time.time > timeOut)
-            {   
-                //Debug.Log("TIMEOUT!");
-                scoreList.Clear();
-                scoreList.Add(new Score("DATABASE TEMPORARILY UNAVAILABLE", 999999));
-                break;
-            }
-        }
+        // while (!_scoresRead)
+        // {
+        //     yield return new WaitForSeconds(0.01f);
+        //     if (Time.time > timeOut)
+        //     {   
+        //         //Debug.Log("TIMEOUT!");
+        //         scoreList.Clear();
+        //         scoreList.Add(new Score("DATABASE TEMPORARILY UNAVAILABLE", 999999));
+        //         break;
+        //     }
+        // }
         
         // scoreList.Clear();
         // scoreList.Add(new Score("DATABASE TEMPORARILY UNAVAILABLE", 999999));
 
         GameObject.FindGameObjectWithTag("ScoresText").GetComponent<Scores>().UpdateGUIText(scoreList);
+        Debug.Log("Score List: " + scoreList);
         yield return new WaitForSeconds(0f);
     }
 

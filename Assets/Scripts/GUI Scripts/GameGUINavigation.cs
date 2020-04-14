@@ -3,6 +3,8 @@ using UnityEngine;
 using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine.UI;
+using MySql.Data;
+using MySql.Data.MySqlClient;
 
 public class GameGUINavigation : MonoBehaviour {
 
@@ -152,6 +154,16 @@ public class GameGUINavigation : MonoBehaviour {
     {
         PlayerPrefs.SetString("Name", name);
 		PlayerPrefs.SetInt("Highscore", score);
+
+		//Connect to a database
+		String cs = @"server=localhost:3306;userid=root;password=12345678;database=pacman";
+		MySqlConnection con = new MySqlConnection(cs);
+		con.Open();
+
+		Debug.Log("Connected to database: " + con.ServerVersion);
+		//Append the score to a database
+
+		Debug.Log("Appended Score");
 
         Debug.Log("SCORE POSTED!");
 
