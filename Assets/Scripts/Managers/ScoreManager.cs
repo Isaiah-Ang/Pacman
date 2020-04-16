@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
+using MySql.Data;
+using MySql.Data.MySqlClient;
 
 public class ScoreManager : MonoBehaviour {
 
@@ -38,8 +40,12 @@ public class ScoreManager : MonoBehaviour {
         // Read scores from the database
         StartCoroutine("ReadScoresFromDB");
 
+        _highscore = scoreList[0].score;
+
         if (level == 2) StartCoroutine("UpdateGUIText");    // if scores is loaded
         if (level == 1) _lowestHigh = _highscore;
+
+        Debug.Log("Score Manager Class");
     }
 
     IEnumerator GetHighestScore()
@@ -60,8 +66,8 @@ public class ScoreManager : MonoBehaviour {
         }
 
         // Retrieves first(highest) score in the list
-        // _highscore = scoreList[0].score;
-        // _lowestHigh = scoreList[scoreList.Count - 1].score;
+        _highscore = scoreList[0].score;
+        _lowestHigh = scoreList[scoreList.Count - 1].score;
     }
 
     // High score menu 
@@ -69,20 +75,11 @@ public class ScoreManager : MonoBehaviour {
     {
         // wait until scores are pulled from database
         float timeOut = Time.time + 4;
-        // while (!_scoresRead)
-        // {
-        //     yield return new WaitForSeconds(0.01f);
-        //     if (Time.time > timeOut)
-        //     {   
-        //         //Debug.Log("TIMEOUT!");
-        //         scoreList.Clear();
-        //         scoreList.Add(new Score("DATABASE TEMPORARILY UNAVAILABLE", 999999));
-        //         break;
-        //     }
+
+        // while(!_scoresRead){
+        //     scoreList.Clear();
+        //     scoreList.Add(new Score("DATABASE TEMPORARILY UNAVAILABLE", 9999999));
         // }
-        
-        // scoreList.Clear();
-        // scoreList.Add(new Score("DATABASE TEMPORARILY UNAVAILABLE", 999999));
 
         GameObject.FindGameObjectWithTag("ScoresText").GetComponent<Scores>().UpdateGUIText(scoreList);
         Debug.Log("Score List: " + scoreList);
@@ -91,59 +88,50 @@ public class ScoreManager : MonoBehaviour {
 
     IEnumerator ReadScoresFromDB()
     {
-        username = PlayerPrefs.GetString("Name", "");
-        _highscore = PlayerPrefs.GetInt("Highscore", 0);
-        scoreList.Add(new Score(username, _highscore));
+        string cs = "Server=127.0.0.1;Database=pacman;Uid=root;CharSet=utf8;Password=12345678;";
+        
+        try{
+    		MySqlConnection con = new MySqlConnection(cs);
+            con.Open();
+
+            Debug.Log("Connected to Database");
+
+            string stmt = "SELECT * FROM highscore ORDER BY score DESC LIMIT 10";
+   			MySqlCommand cmd = new MySqlCommand(stmt, con);
+
+            MySqlDataReader rdr = cmd.ExecuteReader();
+
+            if(rdr.HasRows == true)
+            {
+                while(rdr.Read()){
+                    username = rdr["name"].ToString();
+                    _highscore = int.Parse(rdr["score"].ToString());
+                    Debug.Log(username + _highscore);
+                    scoreList.Add(new Score(username, _highscore));
+                }
+                _scoresRead = true;
+            } else
+            {
+                _scoresRead = false;
+            } 
+
+        } catch(Exception ex)
+        {
+            Debug.Log(ex);
+            _scoresRead = false;
+
+            _highscore = PlayerPrefs.GetInt("Score", 0);
+            username = PlayerPrefs.GetString("Name", "ABC");
+            scoreList.Add(new Score(username, _highscore));
+            StartCoroutine(UpdateGUIText());
+        }
+
+        // if(_scoresRead == false)
+        // {
+            
+        // } else;
 
         yield return null;
-        // WWW GetScoresAttempt = new WWW(TopScoresURL);
-        // yield return GetScoresAttempt;
-
-        // if (GetScoresAttempt.error != null)
-        // {
-        //     Debug.Log(string.Format("ERROR GETTING SCORES: {0}", GetScoresAttempt.error));
-        //     scoreList.Add(new Score(GetScoresAttempt.error, 1234));
-        //     StartCoroutine(UpdateGUIText());
-        // }
-        // else
-        // {
-        //     // ATTENTION: assumes query will find table
-
-        //     string[] textlist = GetScoresAttempt.text.Split(new string[] { "\n", "\t" },
-        //         StringSplitOptions.RemoveEmptyEntries);
-
-        //     if (textlist.Length == 1)
-        //     {
-        //         //`Debug.Log("== 1");
-        //         scoreList.Clear();
-        //         scoreList.Add(new Score(textlist[0], -123));
-        //         yield return null;
-        //     }
-        //     else
-        //     {
-
-
-        //         string[] Names = new string[Mathf.FloorToInt(textlist.Length/2)];
-        //         string[] Scores = new string[Names.Length];
-
-        //         //Debug.Log("Textlist length: " + textlist.Length + " DATA: " + textlist[0]);
-        //         for (int i = 0; i < textlist.Length; i++)
-        //         {
-        //             if (i%2 == 0)
-        //             {
-        //                 Names[Mathf.FloorToInt(i/2)] = textlist[i];
-        //             }
-        //             else Scores[Mathf.FloorToInt(i/2)] = textlist[i];
-        //         }
-
-        //         for (int i = 0; i < Names.Length; i++)
-        //         {
-        //             scoreList.Add(new Score(Names[i], Scores[i]));
-        //         }
-
-        //         _scoresRead = true;
-        //     }
-        // }
 
     }
 

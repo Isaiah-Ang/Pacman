@@ -52,11 +52,14 @@ public class GhostMove : MonoBehaviour {
 	public GameGUINavigation GUINav;
     public PlayerController pacman;
     private GameManager _gm;
+	private AudioSource audio;
+	public AudioClip eat;
 
 	//-----------------------------------------------------------------------------------------
 	// variables end, functions begin
 	void Start()
 	{
+		audio = transform.GetComponent<AudioSource>();
 	    _gm = GameObject.Find("Game Manager").GetComponent<GameManager>();
         _toggleInterval = _gm.scareLength * 0.33f * 0.20f;  
 		InitializeGhost();
@@ -299,6 +302,7 @@ public class GhostMove : MonoBehaviour {
 		    if (state == State.Run)
 		    {
 		        Calm();
+				audio.PlayOneShot(eat);
 		        InitializeGhost(_startPos);
                 pacman.UpdateScore();
 		    }

@@ -14,6 +14,7 @@ public class GameGUINavigation : MonoBehaviour {
 	private bool _paused;
     private bool quit;
     private string _errorMsg;
+	private AudioSource background;
 	//public bool initialWaitOver = false;
 
 	public float initialDelay;
@@ -29,13 +30,17 @@ public class GameGUINavigation : MonoBehaviour {
 	// buttons
 	public Button MenuButton;
 
+	private bool connected;
+
 	//------------------------------------------------------------------
 	// Function Definitions
 
 	// Use this for initialization
 	void Start () 
 	{
+	    background = GameObject.Find("Game Manager").GetComponent<AudioSource>();
 		StartCoroutine("ShowReadyScreen", initialDelay);
+		Debug.Log("GameGuiNavigation Class");
 	}
 	
 	// Update is called once per frame
@@ -75,6 +80,7 @@ public class GameGUINavigation : MonoBehaviour {
 		GameManager.gameState = GameManager.GameState.Init;
 		ReadyCanvas.enabled = true;
 		yield return new WaitForSeconds(seconds);
+		background.Play();
 		ReadyCanvas.enabled = false;
 		GameManager.gameState = GameManager.GameState.Game;
 		//initialWaitOver = true;
@@ -152,24 +158,34 @@ public class GameGUINavigation : MonoBehaviour {
 
     IEnumerator AddScore(string name, int score)
     {
-        PlayerPrefs.SetString("Name", name);
-		PlayerPrefs.SetInt("Highscore", score);
-
-		Debug.Log("Assigned Player Pref");
+		Debug.Log(typeof(string).Assembly.ImageRuntimeVersion);
 
 		//Connect to a database
-		string cs = "server=localhost;user=root;database=pacman;port=3306;password=12345678";
-		MySqlConnection con = new MySqlConnection(cs);
-		//try{
+		string cs = "Server=127.0.0.1;Database=pacman;Uid=root;CharSet=utf8;Password=12345678;";
+		try{
+			MySqlConnection con = new MySqlConnection(cs);
 			con.Open();
 
 			Debug.Log("Connected to database: " + con.ServerVersion);
 			//Append the score to a database
+			string stmt = "INSERT INTO highscore (score, name) VALUES (@Score, @Name)";
+			MySqlCommand cmd = new MySqlCommand(stmt, con);
+
+			cmd.Parameters.AddWithValue("@Score", score);
+			cmd.Parameters.AddWithValue("@Name", name);
+
+			cmd.ExecuteNonQuery();
 
 			Debug.Log("Appended Score");
-		//} catch(Exception ex){
-		//	Debug.Log(ex);
-		//}
+			connected = true;
+			con.Close();
+		} catch(Exception ex){
+			connected = false;
+
+			PlayerPrefs.SetInt("Score", score);
+			PlayerPrefs.SetString("Name", name);
+			Debug.Log(ex);
+		}
         Debug.Log("SCORE POSTED!");
 
         // take care of game manager
@@ -213,7 +229,7 @@ public class GameGUINavigation : MonoBehaviour {
 
 	    if (username == "")                 ToggleErrorMsg("Username cannot be empty");
         else if (!regex.IsMatch(username))  ToggleErrorMsg("Username can only consist alpha-numberic characters");
-        else if (username.Length > 10)      ToggleErrorMsg("Username cannot be longer than 10 characters");
+        else if (username.Length > 20)      ToggleErrorMsg("Username cannot be longer than 20 characters");
         else
 		{
 			StartCoroutine(AddScore(username, highscore));

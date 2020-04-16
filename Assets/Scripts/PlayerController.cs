@@ -16,6 +16,10 @@ public class PlayerController : MonoBehaviour
         public GameObject[] pointSprites;
     }
 
+    public AudioClip chomp1;
+    public AudioClip chomp2;
+    public AudioClip death;
+        
     public PointSprites points;
 
     public static int killstreak = 0;
@@ -28,14 +32,22 @@ public class PlayerController : MonoBehaviour
     public Joystick joystick;
 
     private bool _deadPlaying = false;
+    private bool playedChomp1 = false;
+    private AudioSource audio;
+    private AudioSource background;
 
     // Use this for initialization
     void Start()
     {
+        audio = transform.GetComponent<AudioSource>();
+        background = GameObject.Find("Game Manager").GetComponent<AudioSource>();
+
         GM = GameObject.Find("Game Manager").GetComponent<GameManager>();
         SM = GameObject.Find("Game Manager").GetComponent<ScoreManager>();
         GUINav = GameObject.Find("UI Manager").GetComponent<GameGUINavigation>();
         _dest = transform.position;
+
+        Debug.Log("Player Controller Class");
     }
 
     // Update is called once per frame
@@ -57,9 +69,23 @@ public class PlayerController : MonoBehaviour
         
     }
 
+    public void PlayChompSound(){
+        if(playedChomp1){
+            //Play Chomp2, set playedChomp1 to false
+            audio.PlayOneShot(chomp2, 0.45f);
+            playedChomp1 = false;
+        }else{
+            //Play Chomp1, set playedChomp1 to true
+            audio.PlayOneShot(chomp1, 0.45f);
+            playedChomp1 = true;
+        }
+    }
+
     IEnumerator PlayDeadAnimation()
     {
         _deadPlaying = true;
+        background.Stop();
+        audio.PlayOneShot(death, 0.45f);
         GetComponent<Animator>().SetBool("Die", true);
         yield return new WaitForSeconds(1);
         GetComponent<Animator>().SetBool("Die", false);
